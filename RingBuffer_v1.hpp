@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <atomic>
 #include <cassert>
 #include <iostream>
 #include "defs.hpp"

@@ -98,57 +98,44 @@ void runBenchmark(const std::string& name, Q& queue, P producerFunc, C consumerF
   for (auto& t : consumerThreads) {
     t.join();
   }
-  std::cout << name << " benchmark completed." << std::endl;
-
-  std::cout << name << ": " << " blocks " << std::to_string(numProducers) << " producer  " << std::to_string(numConsumers) << " consumers  " << std::to_string(duration) << " seconds" << std::endl;
   if (!normalize)
-    std::cout << "Total messages/μs processed: " << messageCount.load() / double(1'000'000*duration) << "\n" << std::endl;
+    std::cout << name << ": Total messages/μs processed: " << messageCount.load() / double(1'000'000*duration) << std::endl;
   else {
-    std::cout << "Avg messages/μs per consumer: " << (messageCount.load() / (double)numConsumers/(duration*1'000'000))  << "\n" << std::endl;
+    std::cout << name <<  ": Avg messages/μs per consumer: " << (messageCount.load() / (double)numConsumers/(duration*1'000'000)) << std::endl;
   }
 }
 
-void test_blocking(size_t queue_size, std::vector<int> const & numConsumers, int duration) {
-  for (size_t i = 0; i < numConsumers.size(); i++) {
-    BlockingQueue<int> q(queue_size);
-    runBenchmark<>("Blocking", q, blockingProducer, blockingConsumer, 1, numConsumers[i], duration, /*normalize*/ false);
-  }
+void test_blocking(size_t queue_size, int numConsumers, int duration) {
+  BlockingQueue<int> q(queue_size);
+  runBenchmark<>("Blocking", q, blockingProducer, blockingConsumer, 1, numConsumers, duration, /*normalize*/ false);
 }
 
-void test_spmc(size_t queue_size, std::vector<int> const & numConsumers, int duration) {
-  for (size_t i = 0; i < numConsumers.size(); i++) {
-    SPMC<int> q(queue_size);
-    runBenchmark<>("SPMC", q, producer_spmc, consumer_spmc, 1, numConsumers[i], duration, /*normalize*/ false);
-  }
+void test_spmc(size_t queue_size, int numConsumers, int duration) {
+  SPMC<int> q(queue_size);
+  runBenchmark<>("SPMC", q, producer_spmc, consumer_spmc, 1, numConsumers, duration, /*normalize*/ false);
 }
 
-void test_v1(size_t queue_size, std::vector<int> const & numConsumers, int duration) {
-  for (size_t i = 0; i < numConsumers.size(); i++) {
-    v1::RingBuffer<int> q(queue_size);
-    runBenchmark<>("Version 1", q, producer_ring_buffer<v1::RingBuffer<int>>,
-                   consumer_ring_buffer<v1::RingBuffer<int>>, 1, numConsumers[i], duration, /*normalize*/  true);
-  }
+void test_v1(size_t queue_size, int numConsumers, int duration) {
+  v1::RingBuffer<int> q(queue_size);
+  runBenchmark<>("Ring Buffer v1", q, producer_ring_buffer<v1::RingBuffer<int>>,
+                 consumer_ring_buffer<v1::RingBuffer<int>>, 1, numConsumers, duration, /*normalize*/  true);
 }
 
-void test_v2(size_t queue_size, std::vector<int> const & numConsumers, int duration) {
-  for (size_t i = 0; i < numConsumers.size(); i++) {
-    v2::RingBuffer<int> q(queue_size);
-    runBenchmark<>("Version 1", q, producer_ring_buffer<v2::RingBuffer<int>>,
-                   consumer_ring_buffer<v2::RingBuffer<int>>, 1, numConsumers[i], duration, /*normalize*/  true);
-  }
+void test_v2(size_t queue_size, int numConsumers, int duration) {
+  v2::RingBuffer<int> q(queue_size);
+  runBenchmark<>("Ring Buffer v2", q, producer_ring_buffer<v2::RingBuffer<int>>,
+                 consumer_ring_buffer<v2::RingBuffer<int>>, 1, numConsumers, duration, /*normalize*/  true);
 }
 
-// auto main(int argc, char *argv[]) -> int {
 auto main() -> int {
-  int duration = 15;  // seconds
+  int duration = 20;  // seconds
   int queue_size = 1024;
-  // std::vector<int> num_consumers{1, 2};
-  std::vector<int> num_consumers{4};
-  // test_blocking(queue_size, num_consumers, duration);
-  // test_spmc(queue_size, num_consumers, duration);
+  int num_consumers = 4;
+  std::cout << "Capacity = " << queue_size << " Consumers = " << std::to_string(num_consumers) << " duration = " << duration << " s" << std::endl;
+  test_blocking(queue_size, num_consumers, duration);
+  test_spmc(queue_size, num_consumers, duration);
   test_v1(queue_size, num_consumers, duration);
   test_v2(queue_size, num_consumers, duration);
-
 
   return 0;
 }

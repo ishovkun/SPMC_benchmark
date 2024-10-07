@@ -17,7 +17,7 @@ template <typename T>
 class RingBuffer
 {
   alignas(cache_line_size) u64 _blockIdx{0};
-  std::unique_ptr<Block<T>[]> _blocks;
+  alignas(cache_line_size) std::unique_ptr<Block<T>[]> _blocks;
   size_t _capacity;
 
 
