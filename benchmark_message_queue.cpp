@@ -2,6 +2,7 @@
 #include "RingBuffer_v2.hpp"
 #include "BlockingQueue.hpp"
 #include "spmc.hpp"
+#include <boost/lockfree/queue.hpp>
 #include <iostream>
 #include <thread>
 #include "defs.hpp"
@@ -62,6 +63,27 @@ void blockingConsumer(BlockingQueue<int>& queue, std::atomic<bool> & running, st
       messageCount.fetch_add(1, std::memory_order_relaxed);
     }
   }
+}
+
+void boost_producer(boost::lockfree::queue<int>& queue, std::atomic<bool>& running) {
+    int id = 0;
+    while (running) {
+        while (!queue.push(id)) {
+            std::this_thread::yield();
+        }
+        id++;
+    }
+}
+
+void boost_consumer(boost::lockfree::queue<int>& queue, std::atomic<bool>& running, std::atomic<u64>& messageCount) {
+    int data;
+    while (running) {
+        if (queue.pop(data)) {
+            messageCount++;
+        } else {
+            std::this_thread::yield();
+        }
+    }
 }
 
 template <typename Q, typename P, typename C>
@@ -127,13 +149,20 @@ void test_v2(size_t queue_size, int numConsumers, int duration) {
                  consumer_ring_buffer<v2::RingBuffer<int>>, 1, numConsumers, duration, /*normalize*/  true);
 }
 
+void test_boost(size_t queue_size, int numConsumers, int duration) {
+  boost::lockfree::queue<int> q(queue_size);
+  runBenchmark<>("Boost", q, boost_producer, boost_consumer,
+                 1, numConsumers, duration, /*normalize*/  false);
+}
+
 auto main() -> int {
   int duration = 20;  // seconds
   int queue_size = 1024;
-  int num_consumers = 4;
+  int num_consumers = 1;
   std::cout << "Capacity = " << queue_size << " Consumers = " << std::to_string(num_consumers) << " duration = " << duration << " s" << std::endl;
   test_blocking(queue_size, num_consumers, duration);
   test_spmc(queue_size, num_consumers, duration);
+  test_boost(queue_size, num_consumers, duration);
   test_v1(queue_size, num_consumers, duration);
   test_v2(queue_size, num_consumers, duration);
 

@@ -17,12 +17,14 @@ class BlockingQueue {
       : _capacity{cap}
   {}
 
-  void push(const T & item) {
+  bool push(const T & item) {
     std::unique_lock<std::mutex> lock(_mutex);
-    _cv.wait(lock, [this]() { return _queue.size() < _capacity;});
+    _cv.wait_for(lock, timeout, [this]() { return _queue.size() < _capacity;});
+    if (_queue.size() == _capacity) return false;
     _queue.push(item);
     lock.unlock();
     _cv.notify_one();
+    return true;
   }
 
   bool pop(T & value) {
