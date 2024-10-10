@@ -8,6 +8,11 @@ SPMC queues. Let's meet the contenders:
 - SPMC wait free ring buffer (v1). Not strictly a queue but a ring buffer where readers do not block one another
 - SPMC wait free ring buffer (v2). Same interface as above but a different synchronization mechanism.
 
+## Results
+
+![Intel XEON Gold 5418Y](image_url "img/benchmark_intel.png")
+![Apple M2](image_url "img/benchmark_intel.png")
+
 Inspired by
 https://github.com/rezabrizi/SPMC-Queue/blob/main/README.md
 and
