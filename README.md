@@ -17,6 +17,9 @@ This is the results of my benchmark measured on Intel Xeon Gold 5418Y.
 This is the measurement on my Mac M2.
 ![Apple M2](img/benchmark_mac.png)
 
+## Build Instructions
+I didn't want to bother with CMake this time, so you'll have to tweak the ![Makefile](Makefile) and the cache line size in ![defs.hpp](defs.hpp).
+
 ## References
 Inspired by
 ![rezabrizi's repo](https://youtu.be/8uAW5FQtcvE) and 
