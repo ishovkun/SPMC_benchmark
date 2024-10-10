@@ -17,7 +17,7 @@ This is the results of my benchmark measured on Intel Xeon Gold 5418Y.
 This is the measurement on my Mac M2.
 ![Apple M2](img/benchmark_mac.png)
 
+## References
 Inspired by
-https://github.com/rezabrizi/SPMC-Queue/blob/main/README.md
-and
-https://youtu.be/8uAW5FQtcvE
+![rezabrizi's repo](https://youtu.be/8uAW5FQtcvE) and 
+![David Gross' talk](https://github.com/rezabrizi/SPMC-Queue/blob/main/README.md).
