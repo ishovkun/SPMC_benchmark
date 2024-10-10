@@ -132,7 +132,7 @@ double runBenchmark(const std::string& name, Q& queue, P producerFunc, C consume
   if (!normalize)
     std::cout << name << ": reads/μs (total per all consumers) " << bandwidth << std::endl;
   else {
-    std::cout << name <<  ": reads/μs (avg per consumer): " << bandwidth << std::endl;
+    std::cout << name <<  ": reads/μs (avg per consumer): " << bandwidth / numConsumers << std::endl;
   }
   return bandwidth;
 }
