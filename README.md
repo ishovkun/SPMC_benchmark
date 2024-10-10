@@ -10,8 +10,8 @@ SPMC queues. Let's meet the contenders:
 
 ## Results
 
-![Intel XEON Gold 5418Y](image_url "img/benchmark_intel.png")
-![Apple M2](image_url "img/benchmark_intel.png")
+![Intel XEON Gold 5418Y](img/benchmark_intel.png)
+![Apple M2](img/benchmark_intel.png)
 
 Inspired by
 https://github.com/rezabrizi/SPMC-Queue/blob/main/README.md
