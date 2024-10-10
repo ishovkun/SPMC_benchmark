@@ -30,6 +30,10 @@ This figure summarizes the measurement on my Mac M2.
 I didn't want to bother with CMake this time, so you'll have to tweak the ![Makefile](Makefile) and the cache line size in ![defs.hpp](defs.hpp).
 There is a comparison with Boost so it should be present and pointed to in the ![Makefile](Makefile) in order to compile.
 
+
+## Please please please I want to plot the results too
+Run the benchmark and paste the output (the summary section) into ![this script](plotting/plot_benchmark.py).
+
 ## References
 Inspired by
 ![rezabrizi's repo](https://youtu.be/8uAW5FQtcvE) and 
