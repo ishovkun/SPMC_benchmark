@@ -10,6 +10,10 @@ namespace v1 {
 template <typename T>
 class RingBuffer
 {
+  // aligning these ends up being slower
+  // alignas(cache_line_size) std::atomic<u32> _index;
+  // alignas(cache_line_size) std::atomic<u32> _pending;
+  // so I don't align these
   std::atomic<u32> _index;
   std::atomic<u32> _pending;
   std::unique_ptr<T[]> _data;
