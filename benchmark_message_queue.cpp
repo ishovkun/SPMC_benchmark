@@ -22,11 +22,13 @@ void producer_spmc(SPMC<int>& queue, std::atomic<bool>& running)
 
 void consumer_spmc(SPMC<int>& queue, std::atomic<bool>& running, std::atomic<u64> & messageCount) {
   int value;
+  u64 msg_count_local = 0;
   while (running) {
     if (queue.tryPop(value)) {
-      messageCount.fetch_add(1, std::memory_order_relaxed);
+      msg_count_local++;
     }
   }
+  messageCount.fetch_add(msg_count_local, std::memory_order_relaxed);
 }
 
 template<typename Q>
@@ -40,14 +42,15 @@ void producer_ring_buffer(Q& queue, std::atomic<bool>& running) {
 template<typename Q>
 void consumer_ring_buffer(Q& queue, std::atomic<bool>& running, std::atomic<u64> & messageCount) {
   u64 id = queue.getIdx();
-  // u64 id = 0;
+  u64 msg_count_local = 0;
   int value;
   while (running) {
     if (queue.read(id, value)) {
       id = queue.advance(id);
-      messageCount.fetch_add(1, std::memory_order_relaxed);
+      msg_count_local++;
     }
   }
+  messageCount.fetch_add(msg_count_local, std::memory_order_relaxed);
 }
 
 
@@ -81,13 +84,15 @@ void boost_producer(boost::lockfree::queue<int>& queue, std::atomic<bool>& runni
 
 void boost_consumer(boost::lockfree::queue<int>& queue, std::atomic<bool>& running, std::atomic<u64>& messageCount) {
     int data;
+    u64 msg_count_local = 0;
     while (running) {
         if (queue.pop(data)) {
-            messageCount++;
+            msg_count_local++;
         } else {
             std::this_thread::yield();
         }
     }
+  messageCount.fetch_add(msg_count_local, std::memory_order_relaxed);
 }
 
 template <typename Q, typename P, typename C>
