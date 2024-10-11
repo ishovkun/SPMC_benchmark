@@ -97,7 +97,7 @@ void boost_consumer(boost::lockfree::queue<int>& queue, std::atomic<bool>& runni
 
 template <typename Q, typename P, typename C>
 double runBenchmark(const std::string& name, Q& queue, P producerFunc, C consumerFunc,
-                    int numProducers, int numConsumers, float duration, bool normalize)
+                    int numConsumers, float duration, bool normalize)
 {
   std::atomic<u64> messageCount{0};
   std::chrono::high_resolution_clock::time_point start;
@@ -114,9 +114,7 @@ double runBenchmark(const std::string& name, Q& queue, P producerFunc, C consume
   std::vector<std::thread> producerThreads;
   std::vector<std::thread> consumerThreads;
 
-  for (int i = 0; i < numProducers; ++i) {
-    producerThreads.emplace_back(producerWrapper, std::ref(running));
-  }
+  producerThreads.emplace_back(producerWrapper, std::ref(running));
 
   for (int i = 0; i < numConsumers; ++i) {
     consumerThreads.emplace_back(consumerWrapper, std::ref(running));
@@ -144,29 +142,29 @@ double runBenchmark(const std::string& name, Q& queue, P producerFunc, C consume
 
 auto test_blocking(size_t queue_size, int numConsumers, float duration) {
   BlockingQueue<int> q(queue_size);
-  return runBenchmark<>("Blocking", q, blockingProducer, blockingConsumer, 1, numConsumers, duration, /*normalize*/ false);
+  return runBenchmark<>("Blocking", q, blockingProducer, blockingConsumer, numConsumers, duration, /*normalize*/ false);
 }
 
 auto test_spmc(size_t queue_size, int numConsumers, float duration) {
   SPMC<int> q(queue_size);
-  return runBenchmark<>("SPMC", q, producer_spmc, consumer_spmc, 1, numConsumers, duration, /*normalize*/ false);
+  return runBenchmark<>("SPMC", q, producer_spmc, consumer_spmc, numConsumers, duration, /*normalize*/ false);
 }
 
 auto test_v1(size_t queue_size, int numConsumers, float duration) {
   v1::RingBuffer<int> q(queue_size);
   return runBenchmark<>("Ring Buffer v1", q, producer_ring_buffer<v1::RingBuffer<int>>,
-                        consumer_ring_buffer<v1::RingBuffer<int>>, 1, numConsumers, duration, /*normalize*/  true);
+                        consumer_ring_buffer<v1::RingBuffer<int>>, numConsumers, duration, /*normalize*/  true);
 }
 
 auto test_v2(size_t queue_size, int numConsumers, float duration) {
   v2::RingBuffer<int> q(queue_size);
   return runBenchmark<>("Ring Buffer v2", q, producer_ring_buffer<v2::RingBuffer<int>>,
-                        consumer_ring_buffer<v2::RingBuffer<int>>, 1, numConsumers, duration, /*normalize*/  true);
+                        consumer_ring_buffer<v2::RingBuffer<int>>, numConsumers, duration, /*normalize*/  true);
 }
 
 auto test_boost(size_t queue_size, int numConsumers, float duration) {
   boost::lockfree::queue<int> q(queue_size);
-  return runBenchmark<>("Boost", q, boost_producer, boost_consumer, 1, numConsumers, duration, /*normalize*/  false);
+  return runBenchmark<>("Boost", q, boost_producer, boost_consumer, numConsumers, duration, /*normalize*/  false);
 }
 
 auto print_summary(std::unordered_map<std::string, std::vector<double>>& summary) {
